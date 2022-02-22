@@ -44,6 +44,10 @@ public class KafkaConsumerListener {
         return () -> 3;
     }
 
+    /**
+     * 设置kafka连接，这里配置重发次数为2次
+     * @return
+     */
     @Bean
     public ConcurrentKafkaListenerContainerFactory containerFactory() {
         ConcurrentKafkaListenerContainerFactory factory = new ConcurrentKafkaListenerContainerFactory();
@@ -52,12 +56,17 @@ public class KafkaConsumerListener {
         // 最大重试次数3次
 //        factory.setErrorHandler(new SeekToCurrentErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), 3));
 //        factory.setErrorHandler(new SeekToCurrentErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), KafkaConsumerListener::start));
-
+        // 最大重试次数2次
         factory.setErrorHandler(new SeekToCurrentErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), new FixedBackOff(0L, 2)));
 
         return factory;
     }
 
+    /**
+     * 正常消费kafka消息
+     * @param message
+     * @param acknowledgment
+     */
     @KafkaListener(topics = "kafka-topic1")
     public void onMessage1(String message,Acknowledgment acknowledgment) {
         System.out.println(message);
@@ -65,6 +74,12 @@ public class KafkaConsumerListener {
         log.info("kafka-topic1接收结果:{}", message);
     }
 
+    /**
+     * 模拟产生kafka-topic2的死信消息
+     * @param record
+     * @param acknowledgment
+     * @throws Exception
+     */
     @KafkaListener(topics = "kafka-topic2", containerFactory = "containerFactory", groupId = "testGroup")
     public void onMessage(ConsumerRecord<String, String> record, Acknowledgment acknowledgment) throws Exception {
         Optional kafkaMessage = Optional.ofNullable(record.value());
@@ -86,6 +101,13 @@ public class KafkaConsumerListener {
         }
     }
 
+    /**
+     * 监听kafka-topic2的相关的死信队列消息
+     * @param record
+     * @param acknowledgment
+     * @param exception
+     * @param stacktrace
+     */
     @KafkaListener(id = "testGroup", topics = "kafka-topic2.DLT", groupId = "testGroup")
     public void dltListen(ConsumerRecord<String, String> record, Acknowledgment acknowledgment,
                           @Header(KafkaHeaders.DLT_EXCEPTION_MESSAGE) String exception,
@@ -97,16 +119,20 @@ public class KafkaConsumerListener {
     @KafkaListener(topics = "kafka-topic3", containerFactory = "containerFactory")
     public void onMessage3(String message,Acknowledgment acknowledgment) {
         System.out.println(message);
-        acknowledgment.nack(0L);
+        acknowledgment.nack(0L); //拒绝确认消费消息，会一直从kafka中拉取同一条消息消费，且设置的containerFactory对消费者不提交offset的情况不生效
 //        acknowledgment.acknowledge();
         log.info("kafka-topic3接收结果:{}", message);
     }
 
 
-
-
-
-
+    /**
+     * 延迟队列消费，针对已经可以消费的消息直接发送到真实的业务topic进行消费，针对尚未可以消费的消息放入DelayQueue延迟队列配合DelayQueueMonitor延迟处理
+     * （DelayQueueMonitor可以将到期的消息发到死信队列中，在监听死信队列的逻辑里进行对其进行消费）
+     * @param json
+     * @param acknowledgment
+     * @return
+     * @throws Throwable
+     */
     @KafkaListener(topics = "KAFKA_TOPIC_MESSAGE_DELAY")
     public boolean onMessage2(String json, Acknowledgment acknowledgment) throws Throwable {
         try {

@@ -89,4 +89,12 @@ public class KafkaDemoController {
         kafkaTemplate.send("KAFKA_TOPIC_MESSAGE_DELAY", message);
         return message;
     }
+
+    @RequestMapping("sequential/consume")
+    public String sequentialConsume(String message) {
+        kafkaTemplate.send("TOPIC_INSERT", message);
+        kafkaTemplate.send("TOPIC_UPDATE", message);
+        return message;
+    }
+
 }
