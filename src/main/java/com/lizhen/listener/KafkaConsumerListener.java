@@ -51,6 +51,7 @@ public class KafkaConsumerListener {
         ConcurrentKafkaListenerContainerFactory factory = new ConcurrentKafkaListenerContainerFactory();
         factory.setConsumerFactory(consumerFactory);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        //配置批量拉取
         factory.setBatchListener(true);
         // 单条消息消费 最大重试次数3次
 //        factory.setErrorHandler(new SeekToCurrentErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), 3));
