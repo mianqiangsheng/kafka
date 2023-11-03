@@ -1,5 +1,6 @@
 package com.lizhen.controller;
 
+import com.lizhen.utils.JsonUtils;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.DescribeTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -74,6 +75,13 @@ public class KafkaDemoController {
 
     @RequestMapping("sendStr2")
     public String sendStr2(String message) {
+        kafkaTemplate.send("kafka-topic2", message);
+        return message;
+    }
+
+    @RequestMapping("/object/send")
+    public String sendStr3(@RequestBody EnergyItemAggregate energyItemAggregate) {
+        String message = JsonUtils.toJson(energyItemAggregate);
         kafkaTemplate.send("kafka-topic2", message);
         return message;
     }
