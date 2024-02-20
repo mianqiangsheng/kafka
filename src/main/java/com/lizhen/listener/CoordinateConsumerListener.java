@@ -12,7 +12,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 
 /**
- * 利用自定义类WeakRefHashLock来协调TOPIC_INSERT和TOPIC_UPDATE两个主题的消息处理顺序，保证先insert再update
+ *
+ * 协调多个topic的消息处理顺序应用
+ *
+ * 利用自定义类WeakRefHashLock来协调TOPIC_INSERT和TOPIC_UPDATE两个主题的消息处理顺序，
+ * 保证同一个id的消息，先处理insert再update
  *
  * @author ：li zhen
  * @description:
@@ -20,7 +24,7 @@ import java.util.concurrent.locks.Lock;
  */
 @Component
 @Slf4j
-public class KafkaListenerDemo {
+public class CoordinateConsumerListener {
 
     // 消费到的数据缓存
     private Map<String, String> UPDATE_DATA_MAP = new ConcurrentHashMap<>();
@@ -28,7 +32,7 @@ public class KafkaListenerDemo {
     private Map<String, String> DATA_MAP = new ConcurrentHashMap<>();
     private WeakRefHashLock weakRefHashLock;
 
-    public KafkaListenerDemo(WeakRefHashLock weakRefHashLock) {
+    public CoordinateConsumerListener(WeakRefHashLock weakRefHashLock) {
         this.weakRefHashLock = weakRefHashLock;
     }
 
@@ -45,6 +49,7 @@ public class KafkaListenerDemo {
             log.info("开始处理 {} 的insert", id);
             // 模拟 insert 业务处理
             Thread.sleep(1000);
+            DATA_MAP.put(id, id);
             // 从缓存中获取 是否存在有update数据
             if (UPDATE_DATA_MAP.containsKey(id)){
                 // 缓存数据存在，执行update

@@ -10,6 +10,8 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * 延迟消费消息
+ *
  * @author ：勉强生
  * @description:
  * @date ：2021/10/11 10:49

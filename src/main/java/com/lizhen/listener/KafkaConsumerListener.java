@@ -15,13 +15,14 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-import org.springframework.util.backoff.BackOffExecution;
 import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.Optional;
 import java.util.concurrent.DelayQueue;
 
 /**
+ * 延时队列、死信队列应用
+ *
  * @author ：勉强生
  * @description:
  * @date ：2021/10/8 14:00
@@ -38,10 +39,6 @@ public class KafkaConsumerListener {
 
     static DelayQueue<DelayMessage> delayQueue = new DelayQueue<>();
 
-    private static BackOffExecution start() {
-        return () -> 3;
-    }
-
     /**
      * 设置kafka连接，这里配置重发次数为2次
      * @return
@@ -53,14 +50,8 @@ public class KafkaConsumerListener {
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         //配置批量拉取
         factory.setBatchListener(true);
-        // 单条消息消费 最大重试次数3次
-//        factory.setErrorHandler(new SeekToCurrentErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), 3));
-//        factory.setErrorHandler(new SeekToCurrentErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), KafkaConsumerListener::start));
-        // 最大重试次数2次
-//        factory.setErrorHandler(new SeekToCurrentErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), new FixedBackOff(0L, 2)));
-
-        //多条消息消费 最大重试次数2次
-        factory.setBatchErrorHandler(new RetryingBatchErrorHandler(new FixedBackOff(0L, 2), new DeadLetterPublishingRecoverer(kafkaTemplate)));
+        // 单条消息消费 最大重试次数2次
+        factory.setErrorHandler(new SeekToCurrentErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), new FixedBackOff(0L, 2)));
 
         return factory;
     }
@@ -83,26 +74,26 @@ public class KafkaConsumerListener {
      * @param acknowledgment
      * @throws Exception
      */
-//    @KafkaListener(topics = "kafka-topic2", containerFactory = "containerFactory", groupId = "testGroup")
-//    public void onMessage(ConsumerRecord<String, String> record, Acknowledgment acknowledgment) throws Exception {
-//        Optional kafkaMessage = Optional.ofNullable(record.value());
-//
-//        if (!kafkaMessage.isPresent()) {
-//            throw new Exception("监听到的消息为空值");
-//        }
-//
-//        log.info("topicID: " + record.topic());
-//        log.info("recordValue: " + record.value());
-//
-//        try {
-//            /*业务逻辑*/
-//            throw new RuntimeException("消息异常，进入死信队列...");
-//        } catch (Exception e) {
-//            //这里只是本地更新offset，如果异常导致kafka重发消息并没有提交保存该offset。所以重启服务不能获取偏移量信息，这一行代码可有可无
-//            acknowledgment.acknowledge();
-//            throw new Exception(e);
-//        }
-//    }
+    @KafkaListener(topics = "kafka-topic2", containerFactory = "containerFactory", groupId = "testGroup")
+    public void onMessage(ConsumerRecord<String, String> record, Acknowledgment acknowledgment) throws Exception {
+        Optional kafkaMessage = Optional.ofNullable(record.value());
+
+        if (!kafkaMessage.isPresent()) {
+            throw new Exception("监听到的消息为空值");
+        }
+
+        log.info("topicID: " + record.topic());
+        log.info("recordValue: " + record.value());
+
+        try {
+            /*业务逻辑*/
+            throw new RuntimeException("消息异常，进入死信队列...");
+        } catch (Exception e) {
+            //这里只是本地更新offset，如果异常导致kafka重发消息并没有提交保存该offset。所以重启服务不能获取偏移量信息，这一行代码可有可无
+            acknowledgment.acknowledge();
+            throw new Exception(e);
+        }
+    }
 
     /**
      * 监听kafka-topic2的相关的死信队列消息
@@ -119,6 +110,11 @@ public class KafkaConsumerListener {
         acknowledgment.acknowledge();
     }
 
+    /**
+     * 拒绝确认消息
+     * @param message
+     * @param acknowledgment
+     */
     @KafkaListener(topics = "kafka-topic3", containerFactory = "containerFactory")
     public void onMessage3(String message,Acknowledgment acknowledgment) {
         System.out.println(message);
@@ -155,6 +151,10 @@ public class KafkaConsumerListener {
         return true;
     }
 
+    /**
+     * KAFKA_TOPIC_MESSAGE_DELAY中可以消费的消息实际的topic消费
+     * @param message
+     */
     @KafkaListener(topics = "KAFKA_TOPIC_MESSAGE_DELAY_REAL")
     public void onMessage4(String message){
         System.out.println(message);

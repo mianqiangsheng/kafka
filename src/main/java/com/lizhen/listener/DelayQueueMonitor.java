@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
+ * 处理KAFKA_TOPIC_MESSAGE_DELAY延迟消费消息，只有到期的消息才被处理
+ *
  * @author ：勉强生
  * @description:
  * @date ：2021/10/11 12:30
