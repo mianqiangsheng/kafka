@@ -14,6 +14,8 @@ import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.RetryingBatchErrorHandler;
 import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.util.backoff.FixedBackOff;
 
@@ -65,4 +67,18 @@ public class KafkaMultiConsumerListener implements BatchMessageListener<String, 
         throw new RuntimeException("消息异常，进入死信队列...");
     }
 
+    /**
+     * 监听kafka-topic2的相关的死信队列消息
+     * @param record
+     * @param acknowledgment
+     * @param exception
+     * @param stacktrace
+     */
+    @KafkaListener(id = "testGroup", topics = "kafka-topic2.DLT", groupId = "testGroup")
+    public void dltListen(ConsumerRecord<String, String> record, Acknowledgment acknowledgment,
+                          @Header(KafkaHeaders.DLT_EXCEPTION_MESSAGE) String exception,
+                          @Header(KafkaHeaders.DLT_EXCEPTION_STACKTRACE) String stacktrace) {
+        log.info("Received from DLT: " + record.value());
+        acknowledgment.acknowledge();
+    }
 }

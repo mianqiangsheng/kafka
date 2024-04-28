@@ -27,7 +27,7 @@ import java.util.concurrent.DelayQueue;
  * @description:
  * @date ：2021/10/8 14:00
  */
-@Component
+//@Component
 @Log4j2
 public class KafkaConsumerListener {
 
@@ -49,7 +49,7 @@ public class KafkaConsumerListener {
         factory.setConsumerFactory(consumerFactory);
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
         //配置批量拉取
-        factory.setBatchListener(true);
+        factory.setBatchListener(false);
         // 单条消息消费 最大重试次数2次
         factory.setErrorHandler(new SeekToCurrentErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), new FixedBackOff(0L, 2)));
 
