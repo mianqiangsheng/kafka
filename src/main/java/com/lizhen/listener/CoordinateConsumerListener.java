@@ -22,7 +22,7 @@ import java.util.concurrent.locks.Lock;
  * @description:
  * @date ：2022/2/22 13:51
  */
-@Component
+//@Component
 @Slf4j
 public class CoordinateConsumerListener {
 

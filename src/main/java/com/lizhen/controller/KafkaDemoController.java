@@ -1,5 +1,7 @@
 package com.lizhen.controller;
 
+import com.lizhen.entity.DeviceDataReceive;
+import com.lizhen.entity.EnergyItemAggregate;
 import com.lizhen.utils.JsonUtils;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.DescribeTopicsResult;
@@ -11,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -105,4 +109,22 @@ public class KafkaDemoController {
         return message;
     }
 
+
+    @RequestMapping("/parallel/send")
+    public String sendStr3() {
+
+        String message1 = "{\"buildingId\":\"1\",\"meters\":[{\"meterId\":\"A\",\"dateTime\":\"2024-07-10 01:00:00\",\"parameters\":[{\"parameter\":\"WPP\",\"value\":10},{\"parameter\":\"Ua\",\"value\":1},{\"parameter\":\"Ib\",\"value\":2}]},{\"meterId\":\"B\",\"dateTime\":\"2024-07-10 01:00:00\",\"parameters\":[{\"parameter\":\"WPP\",\"value\":20},{\"parameter\":\"Ua\",\"value\":3},{\"parameter\":\"Ib\",\"value\":4}]}]}";
+        String message2 = "{\"buildingId\":\"2\",\"meters\":[{\"meterId\":\"A\",\"dateTime\":\"2024-07-10 01:00:00\",\"parameters\":[{\"parameter\":\"WPP\",\"value\":10},{\"parameter\":\"Ua\",\"value\":1},{\"parameter\":\"Ib\",\"value\":2}]},{\"meterId\":\"B\",\"dateTime\":\"2024-07-10 01:00:00\",\"parameters\":[{\"parameter\":\"WPP\",\"value\":20},{\"parameter\":\"Ua\",\"value\":3},{\"parameter\":\"Ib\",\"value\":4}]}]}";
+        String message3 = "{\"buildingId\":\"1\",\"meters\":[{\"meterId\":\"A\",\"dateTime\":\"2024-07-10 02:00:00\",\"parameters\":[{\"parameter\":\"WPP\",\"value\":10},{\"parameter\":\"Ua\",\"value\":1},{\"parameter\":\"Ib\",\"value\":2}]},{\"meterId\":\"B\",\"dateTime\":\"2024-07-10 02:00:00\",\"parameters\":[{\"parameter\":\"WPP\",\"value\":20},{\"parameter\":\"Ua\",\"value\":3},{\"parameter\":\"Ib\",\"value\":4}]}]}";
+        String message4 = "{\"buildingId\":\"2\",\"meters\":[{\"meterId\":\"A\",\"dateTime\":\"2024-07-10 02:00:00\",\"parameters\":[{\"parameter\":\"WPP\",\"value\":10},{\"parameter\":\"Ua\",\"value\":1},{\"parameter\":\"Ib\",\"value\":2}]},{\"meterId\":\"B\",\"dateTime\":\"2024-07-10 02:00:00\",\"parameters\":[{\"parameter\":\"WPP\",\"value\":20},{\"parameter\":\"Ua\",\"value\":3},{\"parameter\":\"Ib\",\"value\":4}]}]}";
+
+        List<String> messages = Arrays.asList(message1, message2, message3, message4);
+
+        for (String message : messages) {
+            DeviceDataReceive deviceDataReceive = JsonUtils.toObject(message, DeviceDataReceive.class);
+            kafkaTemplate.send("input-topic", deviceDataReceive.getBuildingId(),message);
+        }
+
+        return "success";
+    }
 }

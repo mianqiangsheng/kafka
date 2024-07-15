@@ -28,7 +28,7 @@ import java.util.List;
  * @description:
  * @date ：2021/10/8 14:00
  */
-@Component
+//@Component
 @Log4j2
 public class KafkaMultiConsumerListener implements BatchMessageListener<String, String> {
 

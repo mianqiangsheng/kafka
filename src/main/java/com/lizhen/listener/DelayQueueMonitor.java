@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter;
  * @description:
  * @date ：2021/10/11 12:30
  */
-@Component
+//@Component
 public class DelayQueueMonitor implements ApplicationRunner {
 
 

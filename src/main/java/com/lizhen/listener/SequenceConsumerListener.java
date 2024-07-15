@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * @description:
  * @date ：2024/1/22 10:43
  */
-@Component
+//@Component
 @Slf4j
 public class SequenceConsumerListener implements BatchMessageListener<String, String> {
 

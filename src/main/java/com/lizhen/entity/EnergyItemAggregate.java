@@ -1,4 +1,4 @@
-package com.lizhen.controller;
+package com.lizhen.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
