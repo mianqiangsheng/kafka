@@ -136,7 +136,7 @@ public class CoreApp {
 
         var options = ParallelConsumerOptions.<String, String>builder()
                 .commitMode(PERIODIC_CONSUMER_ASYNCHRONOUS) //是否提交offset的时候阻塞停止继续消费，如果同步提交则保证提交的offset更接近实际处理过的消息位置，如果异步提交则可能提交的offset离实际处理过的消息位置更远，这两种都可能重复消息，都要保证消费幂等
-                .ordering(UNORDERED) // <2> 提供3种级别的并发顺序保证，1：不要求顺序的 2：partition级别的顺序 3：自定义key级别的顺序
+                .ordering(KEY) // <2> 提供3种级别的并发顺序保证，1：不要求顺序的 2：partition级别的顺序 3：自定义key级别的顺序
                 .maxConcurrency(10) // <3>
                 .batchSize(batch?50:1) // <5> 是否批量处理消息，如果业务处理可以批量，则进行批量处理能增加消费速度，但是如果一批数据中有一条出现错误则会导致该批次所有数据重新返回线程的待处理消息阻塞队列，增大了消息处理规模维度
                 .consumer(kafkaConsumer)

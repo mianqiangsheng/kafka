@@ -17,6 +17,7 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.util.backoff.FixedBackOff;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.DelayQueue;
 
@@ -51,7 +52,7 @@ public class KafkaConsumerListener {
         //配置批量拉取
         factory.setBatchListener(false);
         // 单条消息消费 最大重试次数2次
-        factory.setErrorHandler(new SeekToCurrentErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), new FixedBackOff(0L, 2)));
+//        factory.setErrorHandler(new SeekToCurrentErrorHandler(new DeadLetterPublishingRecoverer(kafkaTemplate), new FixedBackOff(0L, 2)));
 
         return factory;
     }
@@ -118,7 +119,7 @@ public class KafkaConsumerListener {
     @KafkaListener(topics = "kafka-topic3", containerFactory = "containerFactory")
     public void onMessage3(String message,Acknowledgment acknowledgment) {
         System.out.println(message);
-        acknowledgment.nack(0L); //拒绝确认消费消息，会一直从kafka中拉取同一条消息消费，且设置的containerFactory对消费者不提交offset的情况不生效
+        acknowledgment.nack(Duration.ofMillis(0)); //拒绝确认消费消息，会一直从kafka中拉取同一条消息消费，且设置的containerFactory对消费者不提交offset的情况不生效
 //        acknowledgment.acknowledge();
         log.info("kafka-topic3接收结果:{}", message);
     }

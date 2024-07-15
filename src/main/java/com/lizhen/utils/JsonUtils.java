@@ -65,8 +65,8 @@ public final class JsonUtils {
 	 * @return 对象
 	 */
 	public static <T> T toObject(String json, Class<T> valueType) {
-		Assert.hasText(json);
-		Assert.notNull(valueType);
+		Assert.hasText(json,"");
+		Assert.notNull(valueType,"");
 		try {
 			//忽略未知字段
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -87,8 +87,8 @@ public final class JsonUtils {
 	 * @return 对象
 	 */
 	public static <T> T toObject(String json, TypeReference<T> typeReference) {
-		Assert.hasText(json);
-		Assert.notNull(typeReference);
+		Assert.hasText(json,"");
+		Assert.notNull(typeReference,"");
 		try {
 			//忽略未知字段
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -109,8 +109,8 @@ public final class JsonUtils {
 	 * @return 对象
 	 */
 	public static <T> T toObject(String json, JavaType javaType) {
-		Assert.hasText(json);
-		Assert.notNull(javaType);
+		Assert.hasText(json,"");
+		Assert.notNull(javaType,"");
 		try {
 			//忽略未知字段
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

@@ -12,7 +12,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.BatchMessageListener;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
-import org.springframework.kafka.listener.RetryingBatchErrorHandler;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -50,7 +49,7 @@ public class KafkaMultiConsumerListener implements BatchMessageListener<String, 
         //配置批量拉取消息
         factory.setBatchListener(true);
         //多条消息消费 最大重试次数2次
-        factory.setBatchErrorHandler(new RetryingBatchErrorHandler(new FixedBackOff(0L, 2), new DeadLetterPublishingRecoverer(kafkaTemplate)));
+//        factory.setBatchErrorHandler(new RetryingBatchErrorHandler(new FixedBackOff(0L, 2), new DeadLetterPublishingRecoverer(kafkaTemplate)));
 
         return factory;
     }
